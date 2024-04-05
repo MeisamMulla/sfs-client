@@ -1,0 +1,22 @@
+{
+    "name": "meisam-mulla/sfs-client",
+    "description": "A client for interacting with a remote server for content and job management.",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^7.4|^8.0",
+        "guzzlehttp/guzzle": "^7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "MeisamMulla\\SfsClient\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Meisam Mulla",
+            "email": "mmeisam@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable"
+}
