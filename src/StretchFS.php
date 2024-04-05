@@ -7,10 +7,6 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use stdClass;
 
-/**
- * Class Prism
- * Handles communication with a remote server for content and job management.
- */
 class StretchFS
 {
     /**
@@ -273,9 +269,10 @@ class StretchFS
      * Upload file from path
      *
      * @param string $filePath
+     * @param string $folderPath
      * @return array
      */
-    public function fileUpload(string $filePath): array
+    public function fileUpload(string $filePath, string $folderPath = '/'): array
     {
         if (!file_exists($filePath)) {
             throw new Exception('File not found');
