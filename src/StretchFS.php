@@ -188,7 +188,7 @@ class StretchFS
     {
         try {
             $response = $this->client->post('file/folderCreate', [
-                'json' => ['path' => $folderPath],
+                'json' => ['path' => $this->filePathSanitize($folderPath)],
                 'headers' => [
                     'X-STRETCHFS-Token' => $this->token,
                     'Accept' => 'application/json',
@@ -211,7 +211,7 @@ class StretchFS
     {
         try {
             $response = $this->client->post('file/remove', [
-                'json' => ['path' => $folderPath],
+                'json' => ['path' => $this->filePathSanitize($folderPath)],
                 'headers' => ['X-STRETCHFS-Token' => $this->token, 'Accept' => 'application/json'],
             ]);
 
