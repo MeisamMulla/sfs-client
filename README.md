@@ -1,6 +1,8 @@
 # SFS Client
 
-The SFS Client is a PHP library for communicating with a remote server to manage content and jobs. It leverages GuzzleHttp for HTTP requests, providing a simple interface for file uploads, downloads, and job management.
+The SFS Client is a PHP library for communicating with a StretchFS server to manage content and jobs. It leverages GuzzleHttp for HTTP requests, providing a simple interface for file uploads, downloads, and job management.
+
+[StretchFS](https://github.com/nullivex/stretchfs-sdk)
 
 ## Installation
 
