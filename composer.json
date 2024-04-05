@@ -1,6 +1,6 @@
 {
     "name": "meisam-mulla/sfs-client",
-    "description": "A client for interacting with a remote server for content and job management.",
+    "description": "A client for interacting with a StretchFS to manage content and jobs.",
     "type": "library",
     "license": "MIT",
     "require": {
