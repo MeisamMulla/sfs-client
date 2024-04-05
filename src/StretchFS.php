@@ -143,30 +143,6 @@ class StretchFS
         }
     }
 
-    public function contentUpload(string $filepath, string $folderPath = '/'): array
-    {
-        $folderPath = str_replace('/', ',', $folderPath);
-        try {
-            $response = $this->client->post('file/upload', [
-                'multipart' => [
-                    [
-                        'name' => 'file',
-                        'contents' => fopen($filepath, 'r'),
-                    ],
-                ],
-                'headers' => [
-                    'X-STRETCHFS-Token' => $this->token,
-                    'Accept' => 'application/json',
-                ],
-                'query' => ['path' => $folderPath],
-            ]);
-
-            return json_decode($response->getBody()->getContents(), true);
-        } catch (GuzzleException $e) {
-            throw new Exception('Network error: ' . $e->getMessage());
-        }
-    }
-
     /**
      * Download content from remote url
      *
@@ -288,6 +264,7 @@ class StretchFS
                         'filename' => basename($filePath),
                     ],
                 ],
+                'query' => ['path' => $folderPath],
             ]);
 
             return json_decode($response->getBody()->getContents(), true);
