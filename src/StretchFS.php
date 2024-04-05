@@ -222,6 +222,21 @@ class StretchFS
     }
 
     /**
+     * Sanitize file path
+     *
+     * @param string $filePath
+     * @return string
+     */
+    protected function filePathSanitize(string $filePath): string
+    {
+        if (substr($filePath, 0, 1) !== '/') {
+            $filePath = '/' . $filePath;
+        }
+
+        return $filePath;
+    }
+
+    /**
      * List files in folder
      *
      * @param string $folderPath
@@ -231,7 +246,7 @@ class StretchFS
     {
         try {
             $response = $this->client->get('file/list', [
-                'query' => ['path' => $folderPath],
+                'query' => ['path' => $this->filePathSanitize($folderPath)],
                 'headers' => ['X-STRETCHFS-Token' => $this->token, 'Accept' => 'application/json'],
             ]);
 
@@ -264,7 +279,7 @@ class StretchFS
                         'filename' => basename($filePath),
                     ],
                 ],
-                'query' => ['path' => $folderPath],
+                'query' => ['path' => urlencode($this->filePathSanitize($folderPath))],
             ]);
 
             return json_decode($response->getBody()->getContents(), true);
@@ -292,6 +307,7 @@ class StretchFS
                         'filename' => basename($filePath),
                     ],
                 ],
+                'query' => ['path' => urlencode($this->filePathSanitize(pathinfo($filePath, PATHINFO_DIRNAME)))],
             ]);
 
             return json_decode($response->getBody()->getContents(), true);
@@ -310,7 +326,7 @@ class StretchFS
     {
         try {
             $response = $this->client->get('file/download', [
-                'query' => ['path' => $filePath],
+                'query' => ['path' => $this->filePathSanitize($filePath)],
                 'headers' => ['X-STRETCHFS-Token' => $this->token, 'Accept' => 'application/json'],
             ]);
 
@@ -330,7 +346,7 @@ class StretchFS
     {
         try {
             $response = $this->client->get('file/detail', [
-                'query' => ['path' => $filePath],
+                'query' => ['path' => $this->filePathSanitize($filePath)],
                 'headers' => ['X-STRETCHFS-Token' => $this->token, 'Accept' => 'application/json'],
             ]);
 
@@ -350,14 +366,12 @@ class StretchFS
      */
     public function fileLink(string $jobHandle, string $hash, string $path = '/'): array
     {
-        $path = str_replace('/', ',', $path);
-
         try {
             $response = $this->client->post('file/link', [
                 'json' => [
                     'handle' => $jobHandle,
                     'hash' => $hash,
-                    'path' => $path,
+                    'path' => $this->filePathSanitize($path),
                 ],
                 'headers' => ['X-STRETCHFS-Token' => $this->token, 'Accept' => 'application/json'],
             ]);
