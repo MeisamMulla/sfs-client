@@ -60,7 +60,7 @@ $client->fileList(folderPath: '/');
 ## File Management
 Upload a file from path
 ```php
-$client->fileUpload(filePath: '/home/user/somefile.txt');
+$client->fileUpload(filePath: '/home/user/somefile.txt', folderPath: '/');
 ```
 
 Upload a file from string
@@ -84,11 +84,11 @@ $client->fileDelete(filePath: '/text.txt');
 ```
 
 ## Temporary URLs
-Create a temporary url
+Create hash for a temporary url
 ```php
 $purchaseToken = $client->contentPurchase(hash: '2i34ug2b3u4t23b4o82y3t48723458295b3y4i3', seconds: 3600);
 ```
-Revoke temporary url
+Revoke temporary url hash
 ```php
 $hash = $client->contentPurchaseRemove(purchaseToken: 'a54d88e06612d820bc3be72877c74f257b561b19');
 ```
