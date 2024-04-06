@@ -229,10 +229,13 @@ class StretchFS
      */
     protected function filePathSanitize(string $filePath): string
     {
-        if (substr($filePath, 0, 1) !== '/') {
+        $firstChar = substr($filePath, 0, 1);
+
+        if ('.' == $firstChar) {
+            $filePath = '/' . substr($filePath, 1);
+        } else if ('/' !== $firstChar) {
             $filePath = '/' . $filePath;
         }
-
         return $filePath;
     }
 
@@ -246,7 +249,7 @@ class StretchFS
     {
         try {
             $response = $this->client->get('file/list', [
-                'query' => ['path' => $this->filePathSanitize($folderPath)],
+                'query' => ['path' => urlencode($this->filePathSanitize($folderPath))],
                 'headers' => ['X-STRETCHFS-Token' => $this->token, 'Accept' => 'application/json'],
             ]);
 
@@ -269,23 +272,11 @@ class StretchFS
             throw new Exception('File not found');
         }
 
-        try {
-            $response = $this->client->post('file/upload', [
-                'headers' => ['X-STRETCHFS-Token' => $this->token, 'Accept' => 'application/json'],
-                'multipart' => [
-                    [
-                        'name' => 'file',
-                        'contents' => fopen($filePath, 'r'),
-                        'filename' => basename($filePath),
-                    ],
-                ],
-                'query' => ['path' => urlencode($this->filePathSanitize($folderPath))],
-            ]);
-
-            return json_decode($response->getBody()->getContents(), true);
-        } catch (GuzzleException $e) {
-            throw new Exception('Network error: ' . $e->getMessage());
+        if (substr($folderPath, -1) !== '/') {
+            $folderPath = $folderPath . '/';
         }
+
+        return $this->fileUploadFromString($this->filePathSanitize($folderPath . basename($filePath)), file_get_contents($filePath));
     }
 
     /**
@@ -459,7 +450,7 @@ class StretchFS
     {
         try {
             $response = $this->client->post('file/remove', [
-                'json' => ['path' => $filePath],
+                'json' => ['path' => $this->filePathSanitize($filePath)],
                 'headers' => ['X-STRETCHFS-Token' => $this->token, 'Accept' => 'application/json'],
             ]);
 
