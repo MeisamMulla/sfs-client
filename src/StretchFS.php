@@ -25,6 +25,11 @@ class StretchFS
     private $token = null;
 
     /**
+     * @var string Session token for the session.
+     */
+    private $sessionToken = null;
+
+    /**
      * Prism constructor.
      * Initializes the client and sets up the options.
      *
@@ -52,6 +57,8 @@ class StretchFS
         if (!$this->opts->username && !$this->opts->password && !$this->token) {
             throw new Exception("Missing authentication credentials");
         }
+
+        $this->sessionToken = md5(uniqid());
     }
 
     /**
@@ -276,7 +283,7 @@ class StretchFS
             $folderPath = $folderPath . '/';
         }
 
-        return $this->fileUploadFromString($this->filePathSanitize($folderPath . basename($filePath)), file_get_contents($filePath));
+        return $this->fileUploadFromString($folderPath . basename($filePath), file_get_contents($filePath));
     }
 
     /**
@@ -317,13 +324,44 @@ class StretchFS
     {
         try {
             $response = $this->client->get('file/download', [
-                'query' => ['path' => $this->filePathSanitize($filePath)],
-                'headers' => ['X-STRETCHFS-Token' => $this->token, 'Accept' => 'application/json'],
+                'query' => [
+                    'path' => $this->filePathSanitize($filePath),
+                    'token' => $this->sessionToken,
+                ],
+                'headers' => [
+                    'X-STRETCHFS-Token' => $this->token, 'Accept' => 'application/json',
+                    // 'referer' => 'https://' . $this->opts->domain . '/',
+                ],
+                'debug' => true,
             ]);
 
             return json_decode($response->getBody()->getContents(), true);
         } catch (GuzzleException $e) {
             throw new Exception('Network error: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download a file as a stream.
+     *
+     * @param string $filePath The path of the file to download.
+     * @return resource A stream of the file contents.
+     * @throws Exception If the download fails.
+     */
+    public function fileDownloadStream(string $filePath)
+    {
+        try {
+            $downloadInfo = $this->fileDownload($filePath);
+
+            if (!isset($downloadInfo['url'])) {
+                throw new Exception("Missing URL in the download information.");
+            }
+
+            $response = $this->client->request('GET', $downloadInfo['url'], ['stream' => true]);
+
+            return $response->getBody()->detach();
+        } catch (GuzzleException $e) {
+            throw new Exception("Failed to download file stream: " . $e->getMessage());
         }
     }
 
