@@ -75,6 +75,11 @@ Download a file
 $contents = $client->fileDownload(filePath: '/text.txt');
 ```
 
+Stream a file
+```php
+$stream = $client->fileDownloadStream(filePath: '/text.txt');
+```
+
 Get file details
 ```php
 $contents = $client->fileDetail(filePath: '/text.txt');
