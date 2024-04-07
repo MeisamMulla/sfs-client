@@ -91,13 +91,9 @@ $client->fileDelete(filePath: '/text.txt');
 ```
 
 ## Temporary URLs
-Create hash for a temporary url
+Generate url for temporary download
 ```php
-$purchaseToken = $client->contentPurchase(hash: '2i34ug2b3u4t23b4o82y3t48723458295b3y4i3', seconds: 3600);
-```
-Revoke temporary url hash
-```php
-$hash = $client->contentPurchaseRemove(purchaseToken: 'a54d88e06612d820bc3be72877c74f257b561b19');
+$response = $client->fileDownloadUrl(filePath: '/text.txt', seconds: 3600);
 ```
 
 ## Job Management
