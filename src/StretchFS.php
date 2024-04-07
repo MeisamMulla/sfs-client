@@ -318,9 +318,10 @@ class StretchFS
      * Download file from handle
      *
      * @param string $filePath
+     * @param int $life
      * @return array
      */
-    public function fileDownload(string $filePath): array
+    public function fileDownloadUrl(string $filePath, int $life = 3600): array
     {
         try {
             $response = $this->client->get('file/download', [
@@ -330,15 +331,24 @@ class StretchFS
                 ],
                 'headers' => [
                     'X-STRETCHFS-Token' => $this->token, 'Accept' => 'application/json',
-                    // 'referer' => 'https://' . $this->opts->domain . '/',
                 ],
-                'debug' => true,
             ]);
 
             return json_decode($response->getBody()->getContents(), true);
         } catch (GuzzleException $e) {
             throw new Exception('Network error: ' . $e->getMessage());
         }
+    }
+
+    public function fileDownload(string $filePath): string
+    {
+        $object = $this->fileDownloadStream($filePath);
+        $contents = stream_get_contents($object);
+
+        fclose($object);
+        unset($object);
+
+        return $contents;
     }
 
     /**
@@ -351,7 +361,7 @@ class StretchFS
     public function fileDownloadStream(string $filePath)
     {
         try {
-            $downloadInfo = $this->fileDownload($filePath);
+            $downloadInfo = $this->fileDownloadUrl($filePath);
 
             if (!isset($downloadInfo['url'])) {
                 throw new Exception("Missing URL in the download information.");
@@ -401,53 +411,6 @@ class StretchFS
                     'handle' => $jobHandle,
                     'hash' => $hash,
                     'path' => $this->filePathSanitize($path),
-                ],
-                'headers' => ['X-STRETCHFS-Token' => $this->token, 'Accept' => 'application/json'],
-            ]);
-
-            return json_decode($response->getBody()->getContents(), true);
-        } catch (GuzzleException $e) {
-            throw new Exception('Network error: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Generate a temporary download link for a file
-     *
-     * @param string $hash
-     * @param integer $life
-     * @return array
-     */
-    public function contentPurchase(string $hash, int $life = 3600): array
-    {
-        try {
-            $response = $this->client->post('content/purchase', [
-                'json' => [
-                    'hash' => $hash,
-                    'token' => $this->token,
-                    'life' => $life,
-                ],
-                'headers' => ['X-STRETCHFS-Token' => $this->token, 'Accept' => 'application/json'],
-            ]);
-
-            return json_decode($response->getBody()->getContents(), true);
-        } catch (GuzzleException $e) {
-            throw new Exception('Network error: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Remove a purchase token
-     *
-     * @param string $purchaseToken
-     * @return array
-     */
-    public function contentPurchaseRemove(string $purchaseToken): array
-    {
-        try {
-            $response = $this->client->post('content/purchase/remove', [
-                'json' => [
-                    'PURCHASE TOKEN' => $purchaseToken,
                 ],
                 'headers' => ['X-STRETCHFS-Token' => $this->token, 'Accept' => 'application/json'],
             ]);
