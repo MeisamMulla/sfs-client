@@ -285,8 +285,29 @@ class StretchFS
 
         $fileResource = fopen($filePath, 'r');
 
-        if (false === $fileResource) {
+        if (!$fileResource) {
             throw new Exception('Failed to open file');
+        }
+
+        return $this->fileUploadFromResource($fileResource, basename($filePath), $folderPath);
+    }
+
+    /**
+     * Upload file from resource
+     *
+     * @param $resource
+     * @param string $fileName
+     * @param string $folderPath
+     * @return array
+     */
+    public function fileUploadFromResource($resource, string $fileName, string $folderPath = '/'): array
+    {
+        if (!is_resource($resource)) {
+            throw new Exception('Not a resource');
+        }
+
+        if (substr($folderPath, -1) !== '/') {
+            $folderPath .= '/';
         }
 
         try {
@@ -295,22 +316,23 @@ class StretchFS
                 'multipart' => [
                     [
                         'name' => 'file',
-                        'contents' => $fileResource,
-                        'filename' => basename($filePath),
+                        'contents' => $resource,
+                        'filename' => $fileName,
                     ],
                 ],
                 'query' => ['path' => urlencode($this->filePathSanitize($folderPath))],
             ]);
 
-            if (is_resource($fileResource)) {
-                fclose($fileResource);
+            if (is_resource($resource)) {
+                fclose($resource);
             }
 
             return json_decode($response->getBody()->getContents(), true);
         } catch (GuzzleException $e) {
-            if (is_resource($fileResource)) {
-                fclose($fileResource);
+            if (is_resource($resource)) {
+                fclose($resource);
             }
+
             throw new Exception('Network error: ' . $e->getMessage());
         }
     }
