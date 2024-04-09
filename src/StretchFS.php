@@ -280,10 +280,39 @@ class StretchFS
         }
 
         if (substr($folderPath, -1) !== '/') {
-            $folderPath = $folderPath . '/';
+            $folderPath .= '/';
         }
 
-        return $this->fileUploadFromString($folderPath . basename($filePath), file_get_contents($filePath));
+        $fileResource = fopen($filePath, 'r');
+
+        if (false === $fileResource) {
+            throw new Exception('Failed to open file');
+        }
+
+        try {
+            $response = $this->client->post('file/upload', [
+                'headers' => ['X-STRETCHFS-Token' => $this->token, 'Accept' => 'application/json'],
+                'multipart' => [
+                    [
+                        'name' => 'file',
+                        'contents' => $fileResource,
+                        'filename' => basename($filePath),
+                    ],
+                ],
+                'query' => ['path' => urlencode($this->filePathSanitize($folderPath))],
+            ]);
+
+            if (is_resource($fileResource)) {
+                fclose($fileResource);
+            }
+
+            return json_decode($response->getBody()->getContents(), true);
+        } catch (GuzzleException $e) {
+            if (is_resource($fileResource)) {
+                fclose($fileResource);
+            }
+            throw new Exception('Network error: ' . $e->getMessage());
+        }
     }
 
     /**
