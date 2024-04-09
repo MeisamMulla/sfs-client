@@ -379,6 +379,7 @@ class StretchFS
                 'query' => [
                     'path' => $this->filePathSanitize($filePath),
                     'token' => $this->sessionToken,
+                    'life' => $life,
                 ],
                 'headers' => [
                     'X-STRETCHFS-Token' => $this->token, 'Accept' => 'application/json',
